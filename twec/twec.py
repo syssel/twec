@@ -19,7 +19,8 @@ class TWEC:
     Handles alignment between multiple slices of temporal text
     """
     def __init__(self, size=100, sg=0, siter=5, diter=5, ns=10, window=5, alpha=0.025,
-                            min_count=5, workers=2, test = "test", opath="model", init_mode="hidden"):
+                            min_count=5, workers=2, test = "test", opath="model", init_mode="hidden",
+                            batch_words=10000, seed=1, hs=0, sample=0.001, cbow_mean=1, callbacks=[]):
         """
 
         :param size: Number of dimensions. Default is 100.
@@ -54,6 +55,14 @@ class TWEC:
         self.opath = opath
         self.init_mode = init_mode
         self.compass = None
+
+        self.batch_words=batch_words
+        self.seed = seed
+        self.hs = hs
+        self.sample = sample
+        self.cbow_mean = cbow_mean
+        self.callbacks = callbacks
+
         if not os.path.isdir(self.opath):
             os.makedirs(self.opath)
         with open(os.path.join(self.opath, "log.txt"), "w") as f_log:
@@ -98,11 +107,13 @@ class TWEC:
         if self.compass == None or self.init_mode != "copy":
             model = Word2Vec(sg=self.sg, vector_size=self.size, alpha=self.static_alpha, epochs=self.static_iter,
                              negative=self.negative,
-                             window=self.window, min_count=self.min_count, workers=self.workers)
+                             window=self.window, min_count=self.min_count, workers=self.workers,
+                             batch_words=self.batch_words, seed=self.seed, hs=self.hs, sample=self.sample,
+                             cbow_mean=self.cbow_mean, callbacks=self.callbacks)
             model.build_vocab(sentences, trim_rule=self.internal_trimming_rule if self.compass != None else None)
         if self.compass != None:
             model = self.initialize_from_compass(model)
-        model.train(sentences, total_words=sum([len(s) for s in sentences]), epochs=model.epochs, compute_loss=True)
+        model.train(sentences, total_words=sum([len(s) for s in sentences]), epochs=model.epochs, compute_loss=True, callbacks=self.callbacks)
         return model
 
     def train_compass(self, compass_text, overwrite=False):
