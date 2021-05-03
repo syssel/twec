@@ -145,7 +145,7 @@ class TWEC:
             model_dest = os.path.join(self.opath, model_name + ".model")
         else:
              model_name = os.path.splitext(os.path.basename(save_as))[0]
-             model_dest = out_dest
+             model_dest = save_as
 
         self.trained_slices[model_name] = model
 
