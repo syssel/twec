@@ -132,7 +132,7 @@ class TWEC:
         
         self.gvocab = self.compass.wv.key_to_index
 
-    def train_slice(self, slice_text, save=True):
+    def train_slice(self, slice_text, save=True, save_as=None):
         if self.compass == None:
             return Exception("Missing Compass")
         print("Training temporal embeddings: slice {}.".format(slice_text))
@@ -140,12 +140,17 @@ class TWEC:
         sentences = LineSentence(slice_text)
         model = self.train_model(sentences)
 
-        model_name = os.path.splitext(os.path.basename(slice_text))[0]
+        if not save_as:
+            model_name = os.path.splitext(os.path.basename(slice_text))[0]
+            model_dest = os.path.join(self.opath, model_name + ".model")
+        else:
+             model_name = os.path.splitext(os.path.basename(save_as))[0]
+             model_dest = out_dest
 
         self.trained_slices[model_name] = model
 
         if save:
-            model.save(os.path.join(self.opath, model_name + ".model"))
+            model.save(model_dest)
 
         return self.trained_slices[model_name]
 
